@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Click Game</title>
+    <style>
+        .button {
+            background-color: red;
+            color: white;
+            padding: 20px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Number: <span id="number">{{ number }}</span></h1>
+    <button class="button" id="clickButton">Click me!</button>
+
+    <script>
+        // Add event listener to the button
+        document.getElementById('clickButton').addEventListener('click', function() {
+            // Send a POST request to the server when the button is clicked
+            fetch('/click', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update the displayed number with the new value from the server
+                document.getElementById('number').textContent = data.number;
+            });
+        });
+    </script>
+</body>
+</html>
