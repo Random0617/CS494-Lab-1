@@ -30,5 +30,5 @@ Wireless LAN adapter Wi-Fi:
    Subnet Mask . . . . . . . . . . . : XXX.XXX.XXX.X
    Default Gateway . . . . . . . . . : XXX.XXX.X.X
 ```
-* Although the design of the web app is in `index.html`, if you go there, the game will not work. Instead, you have to go to the website of the following form (using any web browser, works on both PC and smartphones in the same lcoal network): `XXX.XXX.X.X:5000`, with `XXX.XXX.X.X` being your IP address.
+* Although the design of the web app is in `index.html`, if you go there, the game will not work. Instead, you have to go to the website of the following form (using any web browser, works on both PC and smartphones in the same local network): `XXX.XXX.X.X:5000`, with `XXX.XXX.X.X` being your IP address.
 * You can now play the improved version of the game with the number being able to update in real time.
