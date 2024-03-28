@@ -15,15 +15,14 @@ Welcome to Node.js v20.12.0.
 Type ".help" for more information.
 ```
 * The folder `node_modules` and the files `packages.json` and `packages-lock.json` already has all the libraries you need. However, if for some reason it does not run correctly on your computer (maybe because it's outdated), do the following (no need to do these if it runs normally):
-** Delete the folder `node_modules` and the files `packages.json` and `packages-lock.json`.
-** Open Command Prompt in the root directory (must be the correct location, this contains the folder `public` and the file `server.js`).
-** In the Command Prompt, install Express.js and Socket.IO using the following command: `npm install express socket.io`. Express.js is used to create the HTTP server and serve static files (like HTML, CSS, and JavaScript), while Socket.IO is used for real-time communication between the server and clients.
-* To run the game, do the following:
-** If using Visual Studio Code with Code Runner extension, run `server.js` in the project. If not, open Command Prompt in the root directory and type `node server.js`. This should be displayed:
+    + Delete the folder `node_modules` and the files `packages.json` and `packages-lock.json`.
+    + Open Command Prompt in the root directory (must be the correct location, this contains the folder `public` and the file `server.js`).
+    + In the Command Prompt, install Express.js and Socket.IO using the following command: `npm install express socket.io`. Express.js is used to create the HTTP server and serve static files (like HTML, CSS, and JavaScript), while Socket.IO is used for real-time communication between the server and clients.
+* If using Visual Studio Code with Code Runner extension, run `server.js` in the project. If not, open Command Prompt in the root directory and type `node server.js`. This should be displayed:
 ```
 Server is running on port 3000
 ```
-** Find your IP address. Go to Command Prompt and type `ipconfig`, find the [IPv4 Address](https://youtu.be/_whymdfq-R4?list=PLzMcBGfZo4-kR7Rh-7JCVDN8lm3Utumvq&t=837). It looks like this:
+* Find your IP address. Go to Command Prompt and type `ipconfig`, find the [IPv4 Address](https://youtu.be/_whymdfq-R4?list=PLzMcBGfZo4-kR7Rh-7JCVDN8lm3Utumvq&t=837). It looks like this:
 ```
 Wireless LAN adapter Wi-Fi:
    Connection-specific DNS Suffix  . : itotolink.net
@@ -31,5 +30,5 @@ Wireless LAN adapter Wi-Fi:
    Subnet Mask . . . . . . . . . . . : XXX.XXX.XXX.X
    Default Gateway . . . . . . . . . : XXX.XXX.X.X
 ```
-** Although the design of the web app is in `index.html`, if you go there, the game will not work. Instead, you have to go to the website of the following form (using any web browser, works on both PC and smartphones in the same lcoal network): `XXX.XXX.X.X:5000`, with `XXX.XXX.X.X` being your IP address.
-** You can now play the improved version of the game with the number being able to update in real time.
+* Although the design of the web app is in `index.html`, if you go there, the game will not work. Instead, you have to go to the website of the following form (using any web browser, works on both PC and smartphones in the same lcoal network): `XXX.XXX.X.X:5000`, with `XXX.XXX.X.X` being your IP address.
+* You can now play the improved version of the game with the number being able to update in real time.
