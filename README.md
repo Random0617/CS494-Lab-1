@@ -1,31 +1,35 @@
 # Introduction
-This is a basic interactive web app to demonstrate how different clients can connect to the same server. It features a big red button saying "Click me!" and above it says "Number: 0". Each time anyone in the server clicks the button, the value X in the "Number: X" increases by 1. This is not automatically updated in real time to all users in the server though, only updated the next time that user clicks the "Click me!" button. Code provided by ChatGPT: https://chat.openai.com/share/147cb03b-f2c6-4c40-85dd-6e58ca62b0b9
+This is a basic interactive web app to demonstrate how different clients can connect to the same server. It features a big red button saying "Click me!" and above it says "Number: 0". Each time anyone in the server clicks the button, the value X in the "Number: X" increases by 1.
+
+This is the improved version of the [first version](https://github.com/Random0617/CS494-Lab-1/commit/696da9c09ec5fa58dea5ce989c95d6374053459a) of this app, now the number displayed is updated immediately for all other users when any user clicks "Hit me!".
+
+Unfortunately, I can only achieve this result using JavaScript for server-side and HTML for client-side. Code provided by [ChatGPT](https://chat.openai.com/share/abefeeb5-8ab3-4c00-b232-aa4c3e4e080c). Python is not used and the installation process is different.
+
+I'd highly recommend learning [HTML](https://www.youtube.com/watch?v=kUMe1FH4CHE) and [JavaScript](https://www.youtube.com/watch?v=PkZNo7MFNFg), if you haven't already.
 # Instructions
 * Clone with the "Open with GitHub Desktop" (that's what I used) or any other clone option suitable for you.
-* Open the project folder. I use Visual Studio Code IDE with the following extensions installed: Python, [Code Runner](https://youtu.be/n0hBK3_QT9A). Install Flask by going to Command Prompt and type `pip install Flask`.
-* Run `server.py`. The output will display something like this:
+* Open the project folder. I use Visual Studio Code IDE with [Code Runner](https://youtu.be/n0hBK3_QT9A) installed to make things easier.
+* Install [Node.js](https://nodejs.org/en). To check if you have installed Node.js successfully, go to Command Prompt and type `node`. This should be shown:
 ```
-[Running] python -u "d:\University\02 - CS494 - Internetworking Protocols\CS494-Lab-1\server.py"
- * Serving Flask app 'server'
- * Debug mode: on
-WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
- * Running on all addresses (0.0.0.0)
- * Running on http://XXX.X.X.X:5000
- * Running on http://XXX.X.X.X:5000
- * Running on http://XXX.XXX.X.X:5000
-Press CTRL+C to quit
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: XXX-XXX-XXX
+Welcome to Node.js v20.12.0.
+Type ".help" for more information.
 ```
-* All devices connected to the same Wi-Fi (local network) as the local host (the one that runs the code) is displayed. Only one of them is the correct server to test, though. Go to Command Prompt and type `ipconfig`, find the [IPv4 Address](https://youtu.be/_whymdfq-R4?list=PLzMcBGfZo4-kR7Rh-7JCVDN8lm3Utumvq&t=837). It looks like this:
+* The folder `node_modules` and the files `packages.json` and `packages-lock.json` already has all the libraries you need. However, if for some reason it does not run correctly on your computer (maybe because it's outdated), do the following (no need to do these if it runs normally):
+** Delete the folder `node_modules` and the files `packages.json` and `packages-lock.json`.
+** Open Command Prompt in the root directory (must be the correct location, this contains the folder `public` and the file `server.js`).
+** In the Command Prompt, install Express.js and Socket.IO using the following command: `npm install express socket.io`. Express.js is used to create the HTTP server and serve static files (like HTML, CSS, and JavaScript), while Socket.IO is used for real-time communication between the server and clients.
+* To run the game, do the following:
+** If using Visual Studio Code with Code Runner extension, run `server.js` in the project. If not, open Command Prompt in the root directory and type `node server.js`. This should be displayed:
+```
+Server is running on port 3000
+```
+** Find your IP address. Go to Command Prompt and type `ipconfig`, find the [IPv4 Address](https://youtu.be/_whymdfq-R4?list=PLzMcBGfZo4-kR7Rh-7JCVDN8lm3Utumvq&t=837). It looks like this:
 ```
 Wireless LAN adapter Wi-Fi:
-
    Connection-specific DNS Suffix  . : itotolink.net
    IPv4 Address. . . . . . . . . . . : XXX.XXX.X.X
    Subnet Mask . . . . . . . . . . . : XXX.XXX.XXX.X
    Default Gateway . . . . . . . . . : XXX.XXX.X.X
 ```
-* In the "output" above, choose the address that matches your IPv4 address in the `ipconfig`. Then you can play the game. You can also use any other device (PC or smartphones) in the same local network to access the exact same website and play. For example, if both devices have their number displays start at 0, and the first user hits "Click me!" 6 times, the next time the second user hits "Click me!", the number display jumps to 7.
-* I'd recommend learning [HTML](https://www.youtube.com/watch?v=kUMe1FH4CHE) and [JavaScript](https://www.youtube.com/watch?v=PkZNo7MFNFg), if you haven't already.
+** Although the design of the web app is in `index.html`, if you go there, the game will not work. Instead, you have to go to the website of the following form (using any web browser, works on both PC and smartphones in the same lcoal network): `XXX.XXX.X.X:5000`, with `XXX.XXX.X.X` being your IP address.
+** You can now play the improved version of the game with the number being able to update in real time.

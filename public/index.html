@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Increment Number Game</title>
+  <style>
+    .button {
+      padding: 10px 20px;
+      background-color: red;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Increment Number Game</h1>
+  <p>Current Number: <span id="currentNumber">0</span></p>
+  <button id="incrementButton" class="button">Increment Number</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Update the current number when receiving updates from the server
+    socket.on('updateNumber', (number) => {
+      document.getElementById('currentNumber').textContent = number;
+    });
+
+    // Handle button click event
+    document.getElementById('incrementButton').addEventListener('click', () => {
+      // Emit an event to the server indicating the button was clicked
+      socket.emit('incrementNumber');
+    });
+  </script>
+</body>
+</html>
