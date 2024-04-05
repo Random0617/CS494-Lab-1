@@ -17,14 +17,7 @@ io.on("connection", (socket) => {
   socket.username = "";
 
   connectedUsers++;
-  io.emit("userCount", {
-    connectedUsers: connectedUsers,
-    registeredPlayers: registeredPlayers,
-  });
-  io.emit("update player list", {
-    list: player_list,
-    length: player_list.length,
-  });
+  updatePlayerCountAndListGlobally(io);
 
   socket.on("disconnect", () => {
     connectedUsers--;
@@ -32,15 +25,8 @@ io.on("connection", (socket) => {
       const indexRemove = player_list.indexOf(socket.username);
       player_list.splice(indexRemove, 1);
       registeredPlayers = player_list.length;
-      io.emit("update player list", {
-        list: player_list,
-        length: player_list.length,
-      });
     }
-    io.emit("userCount", {
-      connectedUsers: connectedUsers,
-      registeredPlayers: registeredPlayers,
-    });
+    updatePlayerCountAndListGlobally(io);
   });
 
   socket.on("check username", (msg) => {
@@ -52,10 +38,7 @@ io.on("connection", (socket) => {
       registeredPlayers = player_list.length;
       socket.has_registered = true;
       console.log("Username submitted: " + socket.username);
-      io.emit("update player list", {
-        list: player_list,
-        length: player_list.length,
-      });
+      updatePlayerCountAndListGlobally(io);
       socket.emit("register successful", registeredPlayers);
     } else if (!notExistingUsername(msg)) {
       socket.emit("username already exists", {});
@@ -76,6 +59,17 @@ function notExistingUsername(username) {
   } else {
     return true;
   }
+}
+
+function updatePlayerCountAndListGlobally(io) {
+  io.emit("userCount", {
+    connectedUsers: connectedUsers,
+    registeredPlayers: registeredPlayers,
+  });
+  io.emit("update player list", {
+    list: player_list,
+    length: player_list.length,
+  });
 }
 
 app.get("/", (req, res) => {
