@@ -27,6 +27,10 @@
       readonly="readonly"
       placeholder="Player list"
     ></textarea>
+    <br />
+    <button id="startGame" style="width: 150px; height: 50px; display: none">
+      Start Game
+    </button>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
@@ -58,6 +62,15 @@
         document.getElementById("registeredCount").textContent =
           registeredPlayers;
       });
+      /*
+      socket.on("startGame button state", function (state) {
+        if (state.registeredPlayers >= 2 && state.has_registered) {
+          document.getElementById("startGame").style.display = "block";
+        } else {
+          document.getElementById("startGame").style.display = "none";
+        }
+      });
+      */
       socket.on("maximum players", function (PLAYER_LIMIT) {
         resultMessage.textContent =
           "Maximum number of players: " + PLAYER_LIMIT;
@@ -68,9 +81,6 @@
       socket.on("not allowed username", function () {
         resultMessage.textContent = "Allowed characters: [A-Z][a-z][0-9][_]";
       });
-      function update_player_list(player_list) {
-        return 0;
-      }
 
       submitBtn.onclick = function () {
         socket.emit("check username", input.value);
