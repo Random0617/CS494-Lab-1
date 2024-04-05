@@ -42,6 +42,9 @@ io.on("connection", (socket) => {
 });
 
 function checkUsername(username) {
+  if (player_list.includes(username)) {
+    return false;
+  }
   var regex = /^[a-zA-Z0-9_]{1,10}$/;
   return regex.test(username);
 }
