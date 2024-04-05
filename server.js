@@ -27,7 +27,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("check username", (msg) => {
-    if (checkUsername(msg)) {
+    if (allowedUsername(msg) && notExistingUsername(msg)) {
       player_list.push(msg);
       socket.username = msg;
       socket.has_registered = true;
@@ -36,17 +36,26 @@ io.on("connection", (socket) => {
         list: player_list,
         length: player_list.length,
       });
-      socket.emit("disable username input", {});
+      socket.emit("register successful", {});
+    } else if (!notExistingUsername(msg)) {
+      socket.emit("username already exists", {});
+    } else {
+      socket.emit("not allowed username", {});
     }
   });
 });
 
-function checkUsername(username) {
-  if (player_list.includes(username)) {
-    return false;
-  }
+function allowedUsername(username) {
   var regex = /^[a-zA-Z0-9_]{1,10}$/;
   return regex.test(username);
+}
+
+function notExistingUsername(username) {
+  if (player_list.includes(username)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 app.get("/", (req, res) => {

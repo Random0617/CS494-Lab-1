@@ -9,7 +9,9 @@
     <h1>Racing Arena</h1>
     <h1>Currently online: <span id="userCount">0</span></h1>
     <div>
-      <label for="usernameInput">Enter your username:</label>
+      <label for="usernameInput" id="usernamePrompt"
+        >Enter your username:</label
+      >
       <input type="text" id="usernameInput" maxlength="10" />
       <button id="checkUsername">Submit</button>
     </div>
@@ -49,9 +51,18 @@
         }
         players_textarea.textContent = players_string;
       });
-      socket.on("disable username input", function () {
+      socket.on("register successful", function () {
         input.readOnly = true;
         submitBtn.style.display = "none";
+        resultMessage.textContent = "Registration completed successfully";
+        document.getElementById("usernamePrompt").textContent =
+          "Your username: ";
+      });
+      socket.on("username already exists", function () {
+        resultMessage.textContent = "Username already taken by another player";
+      });
+      socket.on("not allowed username", function () {
+        resultMessage.textContent = "Allowed characters: [A-Z][a-z][0-9][_]";
       });
       function update_player_list(player_list) {
         return 0;
