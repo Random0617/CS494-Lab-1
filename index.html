@@ -8,6 +8,7 @@
   <body>
     <h1>Racing Arena</h1>
     <h1>Currently online: <span id="userCount">0</span></h1>
+    <h1>Registered players: <span id="registeredCount">0</span></h1>
     <div>
       <label for="usernameInput" id="usernamePrompt"
         >Enter your username:</label
@@ -33,17 +34,14 @@
       let submitBtn = document.getElementById("checkUsername");
       let players_textarea = document.getElementById("player_list");
 
-      socket.on("userCount", (count) => {
-        document.getElementById("userCount").textContent = count;
+      socket.on("userCount", function (user_count) {
+        document.getElementById("userCount").textContent =
+          user_count.connectedUsers;
+        document.getElementById("registeredCount").textContent =
+          user_count.registeredPlayers;
       });
 
       socket.on("update player list", function (player_list) {
-        /*
-        var item = document.createElement("li");
-        item.textContent = msg.username + ": " + msg.message;
-        messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
-        */
         let players_string = "";
         for (let i = 0; i < player_list.length; i++) {
           players_string = players_string.concat(player_list.list[i]);
@@ -51,12 +49,18 @@
         }
         players_textarea.textContent = players_string;
       });
-      socket.on("register successful", function () {
+      socket.on("register successful", function (registeredPlayers) {
         input.readOnly = true;
         submitBtn.style.display = "none";
         resultMessage.textContent = "Registration completed successfully";
         document.getElementById("usernamePrompt").textContent =
           "Your username: ";
+        document.getElementById("registeredCount").textContent =
+          registeredPlayers;
+      });
+      socket.on("maximum players", function (PLAYER_LIMIT) {
+        resultMessage.textContent =
+          "Maximum number of players: " + PLAYER_LIMIT;
       });
       socket.on("username already exists", function () {
         resultMessage.textContent = "Username already taken by another player";
