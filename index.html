@@ -7,7 +7,7 @@
   </head>
   <body>
     <h1>Racing Arena</h1>
-    <h1>Total Users: <span id="userCount">0</span></h1>
+    <h1>Currently online: <span id="userCount">0</span></h1>
     <div>
       <label for="usernameInput">Enter your username:</label>
       <input type="text" id="usernameInput" maxlength="10" />
@@ -49,10 +49,16 @@
         }
         players_textarea.textContent = players_string;
       });
+      socket.on("disable username input", function () {
+        input.readOnly = true;
+        submitBtn.style.display = "none";
+      });
+      function update_player_list(player_list) {
+        return 0;
+      }
 
       submitBtn.onclick = function () {
         socket.emit("check username", input.value);
-        input.value = "";
       };
     </script>
   </body>

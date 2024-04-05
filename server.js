@@ -11,6 +11,9 @@ let registeredPlayers = 0;
 let player_list = [];
 
 io.on("connection", (socket) => {
+  socket.has_registered = false;
+  socket.username = "";
+
   connectedUsers++;
   io.emit("userCount", connectedUsers);
   io.emit("update player list", {
@@ -24,26 +27,25 @@ io.on("connection", (socket) => {
   });
 
   socket.on("check username", (msg) => {
-    player_list.push(msg);
-    console.log("Username submitted: " + msg);
-    io.emit("update player list", {
-      list: player_list,
-      length: player_list.length,
-    });
+    if (checkUsername(msg)) {
+      player_list.push(msg);
+      socket.username = msg;
+      socket.has_registered = true;
+      console.log("Username submitted: " + socket.username);
+      io.emit("update player list", {
+        list: player_list,
+        length: player_list.length,
+      });
+      socket.emit("disable username input", {});
+    }
   });
 });
 
-/*
-function checkUsername() {
-    var username = document.getElementById("usernameInput").value;
-    var regex = /^[a-zA-Z0-9_]{1,10}$/;
-    if (regex.test(username)) {
-        document.getElementById("resultMessage").innerHTML = "Registration completed";
-    } else {
-        document.getElementById("resultMessage").innerHTML = "Choose another username";
-    }
+function checkUsername(username) {
+  var regex = /^[a-zA-Z0-9_]{1,10}$/;
+  return regex.test(username);
 }
-*/
+
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
