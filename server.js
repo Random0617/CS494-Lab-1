@@ -60,7 +60,7 @@ io.on("connection", (socket) => {
 
   socket.on("start game", () => {
     state = "waiting before 1st question";
-    let current_countdown = GAME_START_TIME_LIMIT;
+    let game_loading_current_countdown = GAME_START_TIME_LIMIT;
     /*
     countdownInterval = setInterval(() => {
       countdownValue--;
@@ -72,29 +72,19 @@ io.on("connection", (socket) => {
     */
     io.emit("clear screen");
     io.to("unregistered").emit("not allowed to play");
-    io.to("registered").emit("allowed to play", current_countdown);
-    countdownInterval = setInterval(() => {
-      current_countdown--;
-      io.to("registered").emit("allowed to play", current_countdown);
-      if (current_countdown <= 0) {
-        clearInterval(countdownInterval);
+    io.to("registered").emit("allowed to play", game_loading_current_countdown);
+    game_loading_countdown_interval = setInterval(() => {
+      game_loading_current_countdown--;
+      io.to("registered").emit(
+        "allowed to play",
+        game_loading_current_countdown
+      );
+      if (game_loading_current_countdown <= 0) {
+        clearInterval(game_loading_countdown_interval);
         state = "waiting for next question";
+        question_loading(io);
       }
     }, 1000);
-    // Main game: question loop
-    /*
-    while (true) {
-      current_countdown = QUESTION_LOADING_TIME_LIMIT;
-      io.to("registered").emit("question loading", current_countdown);
-      countdownInterval = setInterval(() => {
-        current_countdown--;
-        io.to("registered").emit("question loading", current_countdown);
-        if (current_countdown <= 0) {
-          clearInterval(countdownInterval);
-          state = "question";
-        }
-      }, 1000);
-    }*/
   });
 });
 
@@ -122,14 +112,49 @@ function updatePlayerCountAndListGlobally(io) {
   });
   io.to("registered").emit("start game button trigger", {
     server_registeredPlayers: registeredPlayers,
-    //socket_isRegistered: socket.has_registered,
   });
-  /*
-  io.emit("start game button trigger", {
-    server_registeredPlayers: registeredPlayers,
-    socket_isRegistered: socket.has_registered,
+}
+
+function question_loading(io) {
+  // Main game: question loop
+  let question_loading_current_countdown = QUESTION_LOADING_TIME_LIMIT;
+  io.to("registered").emit(
+    "question loading",
+    question_loading_current_countdown
+  );
+  question_loading_countdown_interval = setInterval(() => {
+    question_loading_current_countdown--;
+    io.to("registered").emit(
+      "question loading",
+      question_loading_current_countdown
+    );
+    if (question_loading_current_countdown <= 0) {
+      clearInterval(question_loading_countdown_interval);
+      state = "question";
+      question_answering(io);
+    }
+  }, 1000);
+}
+
+function question_answering(io) {
+  let expr = new Expression(0, 0, "+");
+  expr.random();
+  let question_answering_countdown = expr.time_limit;
+  io.to("registered").emit("question answering", {
+    question_answering_countdown: question_answering_countdown,
+    expression: expr.string(),
   });
-  */
+  question_answering_countdown_interval = setInterval(() => {
+    question_answering_countdown--;
+    io.to("registered").emit("question answering", {
+      question_answering_countdown: question_answering_countdown,
+      expression: expr.string(),
+    });
+    if (question_answering_countdown <= 0) {
+      clearInterval(question_answering_countdown_interval);
+      state = "question result";
+    }
+  }, 1000);
 }
 
 function getRandomInteger(min, max) {
@@ -173,6 +198,21 @@ class Expression {
       default:
         return "Invalid operator";
     }
+  }
+  string() {
+    let str = "";
+    if (this.num1 >= 0) {
+      str += this.num1;
+    } else {
+      str = str + "(" + this.num1 + ")";
+    }
+    str = str + " " + this.operator + " ";
+    if (this.num2 >= 0) {
+      str += this.num2;
+    } else {
+      str = str + "(" + this.num2 + ")";
+    }
+    return str;
   }
 
   time_limit() {

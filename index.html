@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Real-Time User Count</title>
+    <title>Racing Arena</title>
     <style>
       .overlay-center {
         position: fixed; /* Fixed positioning relative to the viewport */
@@ -16,11 +16,15 @@
         align-items: center; /* Center vertically */
         z-index: -1; /* Ensure the overlay is below everything else */
       }
+
       .overlay-content {
         text-align: center; /* Center content horizontally */
       }
       #readyToPlay {
         font-size: 28px;
+      }
+      #expression {
+        font-size: 64px;
       }
     </style>
   </head>
@@ -55,6 +59,13 @@
     <div class="overlay-center">
       <div class="overlay-content">
         <p id="readyToPlay" style="display: none">Placeholder text</p>
+      </div>
+      <div
+        class="overlay-content"
+        id="expression question"
+        style="display: none"
+      >
+        <p id="expression">Placeholder text</p>
       </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
@@ -131,13 +142,19 @@
           "Game starts in " + current_countdown + "s...";
         document.getElementById("readyToPlay").style.display = "block";
       });
-      /*
+
       socket.on("question loading", function (current_countdown) {
         document.getElementById("readyToPlay").textContent =
           "Next question starts in " + current_countdown + "s...";
         document.getElementById("readyToPlay").style.display = "block";
       });
-      */
+      socket.on("question answering", function (server) {
+        if (document.getElementById("readyToPlay").style.display == "block") {
+          document.getElementById("readyToPlay").style.display = "none";
+        }
+        document.getElementById("expression").textContent = server.expression;
+        document.getElementById("expression question").style.display = "block";
+      });
       socket.on("not allowed to play", function () {
         document.getElementById("readyToPlay").textContent =
           "The game has already started, please wait for the current game to end.";
