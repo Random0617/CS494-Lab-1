@@ -5,38 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Real-Time User Count</title>
   </head>
+  <h1>Racing Arena</h1>
   <body>
-    <h1>Racing Arena</h1>
-    <h1>Currently online: <span id="userCount">0</span></h1>
-    <h1>Registered players: <span id="registeredCount">0</span></h1>
-    <div>
-      <label for="usernameInput" id="usernamePrompt"
-        >Enter your username:</label
-      >
-      <input type="text" id="usernameInput" maxlength="10" />
-      <button id="checkUsername">Submit</button>
+    <div id="player_registration">
+      <h1>Currently online: <span id="userCount">0</span></h1>
+      <h1>Registered players: <span id="registeredCount">0</span></h1>
+      <div>
+        <label for="usernameInput" id="usernamePrompt"
+          >Enter your username:</label
+        >
+        <input type="text" id="usernameInput" maxlength="10" />
+        <button id="checkUsername">Submit</button>
+      </div>
+      <div id="resultMessage"></div>
+      <div>Successfully registered players:</div>
+      <br />
+      <textarea
+        name="player_list"
+        id="player_list"
+        cols="30"
+        rows="10"
+        readonly="readonly"
+        placeholder="Player list"
+      ></textarea>
+      <br />
+      <button id="startGame" style="width: 150px; height: 50px; display: none">
+        Start Game
+      </button>
     </div>
-    <div id="resultMessage"></div>
-    <div>Successfully registered players:</div>
-    <br />
-    <textarea
-      name="player_list"
-      id="player_list"
-      cols="30"
-      rows="10"
-      readonly="readonly"
-      placeholder="Player list"
-    ></textarea>
-    <br />
-    <button id="startGame" style="width: 150px; height: 50px; display: none">
-      Start Game
-    </button>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
       let input = document.getElementById("usernameInput");
       let submitBtn = document.getElementById("checkUsername");
       let players_textarea = document.getElementById("player_list");
+      let startGameBtn = document.getElementById("startGame");
+      let player_registration_group = document.getElementById(
+        "player_registration"
+      );
 
       socket.on("userCount", function (user_count) {
         document.getElementById("userCount").textContent =
@@ -93,9 +99,15 @@
       socket.on("not allowed username", function () {
         resultMessage.textContent = "Allowed characters: [A-Z][a-z][0-9][_]";
       });
+      socket.on("clear screen", function () {
+        player_registration_group.style.display = "none";
+      });
 
       submitBtn.onclick = function () {
         socket.emit("check username", input.value);
+      };
+      startGameBtn.onclick = function () {
+        socket.emit("start game");
       };
     </script>
   </body>

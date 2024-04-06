@@ -11,6 +11,7 @@ const PLAYER_LIMIT = 10;
 let connectedUsers = 0;
 let registeredPlayers = 0;
 let player_list = [];
+let state = "registration";
 
 io.on("connection", (socket) => {
   socket.has_registered = false;
@@ -48,6 +49,11 @@ io.on("connection", (socket) => {
     } else {
       socket.emit("not allowed username", {});
     }
+  });
+
+  socket.on("start game", () => {
+    state = "game begins";
+    io.emit("clear screen");
   });
 });
 

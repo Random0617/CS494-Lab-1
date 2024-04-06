@@ -53,5 +53,6 @@ In `server.js`, the first 6 lines of code (line 1-3 and line 5-7) are the declar
 The most important server-related function is `io.on("connection", (socket) => {...})`. Inside here is what happens while a specific client (socket) connects to the server. `emit` and `on` statements can be found in both `index.html` and `server.js`. Here is how they work:
 
 - `io.emit()` in `server.js` (which does not have its implementation attached here) means that the `socket.on()` function with the same name in `index.html` (where its actual implementation is found) is called, applied to all users.
+- `io.to("room_name").emit(...)` in `server.js` means all clients in the correct [room](https://socket.io/docs/v3/rooms/) set by the server, and only them, will have their respective `socket.on()` function with the same name in `index.html` called. It is the responsibility of the programmer to properly divide clients into groups (rooms) based on the logic of the app.
 - `socket.emit()` in `server.js` means that the `socket.on()` function with the same name in `index.html` is called, applied only to the user/client/socket triggered it.
 - `socket.emit()` in `index.html` means that the information that the action/information of the specific user/client/socket has provided is sent to the server via the `socket.on()` function with the same name in `server.js`.
