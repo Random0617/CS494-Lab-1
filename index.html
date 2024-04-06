@@ -26,6 +26,43 @@
       #expression {
         font-size: 64px;
       }
+      #player_name {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        margin: 10px; /* Optional: Add margin for spacing */
+        font-size: 48px;
+      }
+      #question_timer {
+        position: absolute;
+        top: 0%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 40px;
+      }
+      #answer {
+        position: absolute;
+        top: 70%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 40px;
+      }
+      #lock_in_reminder {
+        position: absolute;
+        top: 75%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 30px;
+      }
+      #leaderboard {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 10px; /* Optional: Add margin for spacing */
+      }
     </style>
   </head>
   <h1>Racing Arena</h1>
@@ -68,6 +105,13 @@
         <p id="expression">Placeholder text</p>
       </div>
     </div>
+    <p id="player_name" style="display: none">PlayerName</p>
+    <p id="question_timer" style="display: none">15</p>
+    <input type="number" id="answer" style="display: none" />
+    <p id="lock_in_reminder" style="display: none">
+      Press "Enter" to lock in your answer
+    </p>
+    <p id="leaderboard" style="display: block">25 points to win</p>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
@@ -78,6 +122,11 @@
       let player_registration_group = document.getElementById(
         "player_registration"
       );
+      let readyToPlayText = document.getElementById("readyToPlay");
+      let player_name_text = document.getElementById("player_name");
+      let question_timer_text = document.getElementById("question_timer");
+      let answer_text = document.getElementById("answer");
+      let lock_in_reminder_text = document.getElementById("lock_in_reminder");
 
       socket.on("userCount", function (user_count) {
         document.getElementById("userCount").textContent =
@@ -138,27 +187,39 @@
         player_registration_group.style.display = "none";
       });
       socket.on("allowed to play", function (current_countdown) {
-        document.getElementById("readyToPlay").textContent =
+        readyToPlayText.textContent =
           "Game starts in " + current_countdown + "s...";
-        document.getElementById("readyToPlay").style.display = "block";
+        readyToPlayText.style.display = "block";
       });
-
+      socket.on("display player name bottom left", function (name) {
+        player_name_text.textContent = name;
+        player_name_text.style.display = "block";
+      });
       socket.on("question loading", function (current_countdown) {
-        document.getElementById("readyToPlay").textContent =
+        readyToPlayText.textContent =
           "Next question starts in " + current_countdown + "s...";
-        document.getElementById("readyToPlay").style.display = "block";
+        readyToPlayText.style.display = "block";
       });
       socket.on("question answering", function (server) {
-        if (document.getElementById("readyToPlay").style.display == "block") {
-          document.getElementById("readyToPlay").style.display = "none";
+        if (readyToPlayText.style.display == "block") {
+          readyToPlayText.style.display = "none";
         }
+        console.log(server.question_answering_countdown);
+        question_timer_text.style.display = "block";
+        question_timer_text.textContent = server.question_answering_countdown;
         document.getElementById("expression").textContent = server.expression;
         document.getElementById("expression question").style.display = "block";
+        if (answer_text.style.display == "none") {
+          answer_text.style.display = "block";
+        }
+        if (lock_in_reminder_text.style.display == "none") {
+          lock_in_reminder_text.style.display = "block";
+        }
       });
       socket.on("not allowed to play", function () {
-        document.getElementById("readyToPlay").textContent =
+        readyToPlayText.textContent =
           "The game has already started, please wait for the current game to end.";
-        document.getElementById("readyToPlay").style.display = "block";
+        readyToPlayText.style.display = "block";
       });
       submitBtn.onclick = function () {
         socket.emit("check username", input.value);

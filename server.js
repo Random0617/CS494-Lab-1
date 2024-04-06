@@ -48,6 +48,7 @@ io.on("connection", (socket) => {
       socket.has_registered = true;
       socket.leave("unregistered");
       socket.join("registered");
+      socket.join(socket.username);
       console.log("Username submitted: " + socket.username);
       updatePlayerCountAndListGlobally(io);
       socket.emit("register successful", registeredPlayers);
@@ -71,6 +72,12 @@ io.on("connection", (socket) => {
     }, 1000);
     */
     io.emit("clear screen");
+    for (let i = 0; i < player_list.length; i++) {
+      io.to(player_list[i]).emit(
+        "display player name bottom left",
+        player_list[i]
+      );
+    }
     io.to("unregistered").emit("not allowed to play");
     io.to("registered").emit("allowed to play", game_loading_current_countdown);
     game_loading_countdown_interval = setInterval(() => {
@@ -139,7 +146,7 @@ function question_loading(io) {
 function question_answering(io) {
   let expr = new Expression(0, 0, "+");
   expr.random();
-  let question_answering_countdown = expr.time_limit;
+  let question_answering_countdown = expr.time_limit();
   io.to("registered").emit("question answering", {
     question_answering_countdown: question_answering_countdown,
     expression: expr.string(),
