@@ -4,6 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Real-Time User Count</title>
+    <style>
+      .overlay-center {
+        position: fixed; /* Fixed positioning relative to the viewport */
+        top: 0;
+        left: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        z-index: -1; /* Ensure the overlay is below everything else */
+      }
+      .overlay-content {
+        text-align: center; /* Center content horizontally */
+      }
+      #readyToPlay {
+        font-size: 28px;
+      }
+    </style>
   </head>
   <h1>Racing Arena</h1>
   <body>
@@ -32,6 +51,11 @@
       <button id="startGame" style="width: 150px; height: 50px; display: none">
         Start Game
       </button>
+    </div>
+    <div class="overlay-center">
+      <div class="overlay-content">
+        <p id="readyToPlay" style="display: none">Placeholder text</p>
+      </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -102,7 +126,16 @@
       socket.on("clear screen", function () {
         player_registration_group.style.display = "none";
       });
-
+      socket.on("allowed to play", function () {
+        document.getElementById("readyToPlay").textContent =
+          "One player has started the game and you have registered successfully.";
+        document.getElementById("readyToPlay").style.display = "block";
+      });
+      socket.on("not allowed to play", function () {
+        document.getElementById("readyToPlay").textContent =
+          "The game has already started, please wait for the current game to end.";
+        document.getElementById("readyToPlay").style.display = "block";
+      });
       submitBtn.onclick = function () {
         socket.emit("check username", input.value);
       };

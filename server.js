@@ -17,7 +17,10 @@ io.on("connection", (socket) => {
   socket.has_registered = false;
   socket.username = "";
   socket.join("unregistered");
-
+  if (state == "game begins") {
+    socket.emit("clear screen");
+    socket.emit("not allowed to play");
+  }
   connectedUsers++;
   updatePlayerCountAndListGlobally(io);
 
@@ -54,6 +57,8 @@ io.on("connection", (socket) => {
   socket.on("start game", () => {
     state = "game begins";
     io.emit("clear screen");
+    io.to("registered").emit("allowed to play");
+    io.to("unregistered").emit("not allowed to play");
   });
 });
 
