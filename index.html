@@ -126,11 +126,18 @@
       socket.on("clear screen", function () {
         player_registration_group.style.display = "none";
       });
-      socket.on("allowed to play", function () {
+      socket.on("allowed to play", function (current_countdown) {
         document.getElementById("readyToPlay").textContent =
-          "One player has started the game and you have registered successfully.";
+          "Game starts in " + current_countdown + "s...";
         document.getElementById("readyToPlay").style.display = "block";
       });
+      /*
+      socket.on("question loading", function (current_countdown) {
+        document.getElementById("readyToPlay").textContent =
+          "Next question starts in " + current_countdown + "s...";
+        document.getElementById("readyToPlay").style.display = "block";
+      });
+      */
       socket.on("not allowed to play", function () {
         document.getElementById("readyToPlay").textContent =
           "The game has already started, please wait for the current game to end.";

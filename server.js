@@ -7,6 +7,10 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const PLAYER_LIMIT = 10;
+const GAME_START_TIME_LIMIT = 5;
+const QUESTION_LOADING_TIME_LIMIT = 5;
+const RESULT_TIME_LIMIT = 7;
+const WINNER_TIME_LIMIT = 15;
 
 let connectedUsers = 0;
 let registeredPlayers = 0;
@@ -17,7 +21,7 @@ io.on("connection", (socket) => {
   socket.has_registered = false;
   socket.username = "";
   socket.join("unregistered");
-  if (state == "game begins") {
+  if (state != "registration") {
     socket.emit("clear screen");
     socket.emit("not allowed to play");
   }
@@ -55,10 +59,42 @@ io.on("connection", (socket) => {
   });
 
   socket.on("start game", () => {
-    state = "game begins";
+    state = "waiting before 1st question";
+    let current_countdown = GAME_START_TIME_LIMIT;
+    /*
+    countdownInterval = setInterval(() => {
+      countdownValue--;
+      io.emit('countdown', countdownValue); // Emit countdown value to all clients
+      if (countdownValue <= 0) {
+        clearInterval(countdownInterval);
+      }
+    }, 1000);
+    */
     io.emit("clear screen");
-    io.to("registered").emit("allowed to play");
     io.to("unregistered").emit("not allowed to play");
+    io.to("registered").emit("allowed to play", current_countdown);
+    countdownInterval = setInterval(() => {
+      current_countdown--;
+      io.to("registered").emit("allowed to play", current_countdown);
+      if (current_countdown <= 0) {
+        clearInterval(countdownInterval);
+        state = "waiting for next question";
+      }
+    }, 1000);
+    // Main game: question loop
+    /*
+    while (true) {
+      current_countdown = QUESTION_LOADING_TIME_LIMIT;
+      io.to("registered").emit("question loading", current_countdown);
+      countdownInterval = setInterval(() => {
+        current_countdown--;
+        io.to("registered").emit("question loading", current_countdown);
+        if (current_countdown <= 0) {
+          clearInterval(countdownInterval);
+          state = "question";
+        }
+      }, 1000);
+    }*/
   });
 });
 
