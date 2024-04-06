@@ -15,6 +15,7 @@ let player_list = [];
 io.on("connection", (socket) => {
   socket.has_registered = false;
   socket.username = "";
+  socket.join("unregistered");
 
   connectedUsers++;
   updatePlayerCountAndListGlobally(io);
@@ -37,6 +38,8 @@ io.on("connection", (socket) => {
       socket.username = msg;
       registeredPlayers = player_list.length;
       socket.has_registered = true;
+      socket.leave("unregistered");
+      socket.join("registered");
       console.log("Username submitted: " + socket.username);
       updatePlayerCountAndListGlobally(io);
       socket.emit("register successful", registeredPlayers);
@@ -70,6 +73,16 @@ function updatePlayerCountAndListGlobally(io) {
     list: player_list,
     length: player_list.length,
   });
+  io.to("registered").emit("start game button trigger", {
+    server_registeredPlayers: registeredPlayers,
+    //socket_isRegistered: socket.has_registered,
+  });
+  /*
+  io.emit("start game button trigger", {
+    server_registeredPlayers: registeredPlayers,
+    socket_isRegistered: socket.has_registered,
+  });
+  */
 }
 
 function getRandomInteger(min, max) {

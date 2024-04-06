@@ -46,6 +46,7 @@
       });
 
       socket.on("update player list", function (player_list) {
+        console.log("Accessing update player list function");
         let players_string = "";
         for (let i = 0; i < player_list.length; i++) {
           players_string = players_string.concat(player_list.list[i]);
@@ -53,6 +54,17 @@
         }
         players_textarea.textContent = players_string;
       });
+
+      socket.on("start game button trigger", function (state) {
+        if (state.server_registeredPlayers >= 2) {
+          document.getElementById("startGame").style.display = "block";
+          console.log("Display start button");
+        } else {
+          document.getElementById("startGame").style.display = "none";
+          console.log("Hide start button");
+        }
+      });
+
       socket.on("register successful", function (registeredPlayers) {
         input.readOnly = true;
         submitBtn.style.display = "none";
