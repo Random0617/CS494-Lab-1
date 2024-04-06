@@ -57,11 +57,33 @@
         text-align: center;
         font-size: 30px;
       }
-      #leaderboard {
+      #goal {
         position: absolute;
         top: 0;
         right: 0;
         margin: 10px; /* Optional: Add margin for spacing */
+      }
+      #mini_leaderboard {
+        position: absolute;
+        top: 5%;
+        right: 0;
+        margin: 10px; /* Optional: Add margin for spacing */
+      }
+      #post_question_result_text {
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 36px;
+      }
+      #post_question_leaderboard_text {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-size: 30px;
       }
     </style>
   </head>
@@ -111,7 +133,47 @@
     <p id="lock_in_reminder" style="display: none">
       Press "Enter" to lock in your answer
     </p>
-    <p id="leaderboard" style="display: block">25 points to win</p>
+
+    <div id="mini_leaderboard_group" style="display: none">
+      <p id="goal">25 points to win</p>
+
+      <textarea
+        id="mini_leaderboard"
+        cols="20"
+        rows="12"
+        readonly="readonly"
+        placeholder="Leaderboard"
+      ></textarea>
+    </div>
+    <div id="post_question_result_group" style="display: none">
+      <p id="post_question_result_text">Question leaderboard</p>
+      <textarea
+        name="post_question_leaderboard_text"
+        id="post_question_leaderboard_text"
+        cols="50"
+        rows="11"
+        readonly="readonly"
+        placeholder="Player list"
+      ></textarea>
+    </div>
+    <script>
+      // Placeholder
+      let placeholder_question_leaderboard =
+        "Rank - Username - Time taken - Score";
+      placeholder_question_leaderboard += "\n#1 - Player1 - 8.42s - +3";
+      placeholder_question_leaderboard += "\n#2 - Player2 - 9.15s - +1";
+      placeholder_question_leaderboard += "\n#3 - Player3 - 10.22s - +1";
+      placeholder_question_leaderboard += "\n#4 - Player4 - 3.41s - -1";
+      placeholder_question_leaderboard += "\n#5 - Player5 - N/A - -1";
+      placeholder_question_leaderboard += "\n#6 - Player1 - 8.42s - +3";
+      placeholder_question_leaderboard += "\n#7 - Player2 - 9.15s - +1";
+      placeholder_question_leaderboard += "\n#8 - Player3 - 10.22s - +1";
+      placeholder_question_leaderboard += "\n#9 - Player4 - 3.41s - -1";
+      placeholder_question_leaderboard += "\n#10 - Player5 - N/A - -1";
+      document.getElementById("post_question_leaderboard_text").textContent =
+        placeholder_question_leaderboard;
+    </script>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
@@ -127,6 +189,20 @@
       let question_timer_text = document.getElementById("question_timer");
       let answer_text = document.getElementById("answer");
       let lock_in_reminder_text = document.getElementById("lock_in_reminder");
+      let mini_leaderboard_group = document.getElementById(
+        "mini_leaderboard_group"
+      );
+      let mini_leaderboard = document.getElementById("mini_leaderboard");
+      let expression = document.getElementById("expression question");
+      let post_question_result_group = document.getElementById(
+        "post_question_result_group"
+      );
+      let post_question_result_text = document.getElementById(
+        "post_question_result_text"
+      );
+      let post_question_leaderboard_text = document.getElementById(
+        "post_question_leaderboard_text"
+      );
 
       socket.on("userCount", function (user_count) {
         document.getElementById("userCount").textContent =
@@ -190,12 +266,27 @@
         readyToPlayText.textContent =
           "Game starts in " + current_countdown + "s...";
         readyToPlayText.style.display = "block";
+        //mini_leaderboard_group.style.display = "block";
+      });
+      socket.on("set leaderboard text", function (player_list) {
+        // Placeholder
+        console.log("Has reached set leaderboard text");
+        let players_string = "";
+        for (let i = 0; i < player_list.length; i++) {
+          players_string = players_string.concat(player_list[i]);
+          players_string = players_string.concat("\n");
+        }
+        mini_leaderboard.textContent = players_string;
+        mini_leaderboard_group.style.display = "block";
       });
       socket.on("display player name bottom left", function (name) {
         player_name_text.textContent = name;
         player_name_text.style.display = "block";
       });
       socket.on("question loading", function (current_countdown) {
+        question_timer_text.style.display = "none";
+        post_question_result_group.style.display = "none";
+        mini_leaderboard.style.display = "block";
         readyToPlayText.textContent =
           "Next question starts in " + current_countdown + "s...";
         readyToPlayText.style.display = "block";
@@ -215,6 +306,41 @@
         if (lock_in_reminder_text.style.display == "none") {
           lock_in_reminder_text.style.display = "block";
         }
+      });
+      socket.on("question result", function (server) {
+        post_question_result_text.textContent = "Question leaderboard";
+        if (expression.style.display == "block") {
+          expression.style.display = "none";
+        }
+        if (answer_text.style.display == "block") {
+          answer_text.style.display = "none";
+        }
+        if (lock_in_reminder_text.style.display == "block") {
+          lock_in_reminder_text.style.display = "none";
+        }
+        if (post_question_result_group.style.display == "none") {
+          post_question_result_group.style.display = "block";
+        }
+        question_timer_text.textContent = server.question_result_countdown;
+      });
+      socket.on("overall result", function (server) {
+        question_timer_text.textContent = server.overall_result_countdown;
+        post_question_result_text.textContent = "Overall leaderboard";
+        mini_leaderboard.style.display = "none";
+        // Placeholder
+        let placeholder_text = "Rank - Username - Consecutive wrongs - Score";
+        placeholder_text += "\n#1 - Player1 - 1 - 12";
+        placeholder_text += "\n#2 - Player2 - 2 - 11";
+        placeholder_text += "\n#3 - Player3 - 0 - 10";
+        placeholder_text += "\n#4 - Player4 - 2 - 9";
+        placeholder_text += "\n#5 - Player5 - 1 - 8";
+        placeholder_text += "\n#6 - Player6 - 0 - 6";
+        placeholder_text += "\n#7 - Player7 - 1 - 5";
+        placeholder_text += "\n#8 - Player8 - 2 - 4";
+        placeholder_text += "\n#9 - Player9 - 3 - N/A";
+        placeholder_text += "\n#10 - Player10 - 3 - N/A";
+        post_question_leaderboard_text.textContent = placeholder_text;
+        // End of placeholder
       });
       socket.on("not allowed to play", function () {
         readyToPlayText.textContent =

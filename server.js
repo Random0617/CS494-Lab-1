@@ -79,6 +79,7 @@ io.on("connection", (socket) => {
       );
     }
     io.to("unregistered").emit("not allowed to play");
+    io.to("registered").emit("set leaderboard text", player_list);
     io.to("registered").emit("allowed to play", game_loading_current_countdown);
     game_loading_countdown_interval = setInterval(() => {
       game_loading_current_countdown--;
@@ -160,6 +161,48 @@ function question_answering(io) {
     if (question_answering_countdown <= 0) {
       clearInterval(question_answering_countdown_interval);
       state = "question result";
+      question_result(io);
+    }
+  }, 1000);
+}
+
+function question_result(io) {
+  console.log("Reached question result phase");
+  let question_result_countdown = RESULT_TIME_LIMIT;
+  io.to("registered").emit("question result", {
+    question_result_countdown: question_result_countdown,
+    player_list: player_list,
+  });
+  question_result_countdown_interval = setInterval(() => {
+    question_result_countdown--;
+    io.to("registered").emit("question result", {
+      question_result_countdown: question_result_countdown,
+      player_list: player_list,
+    });
+    if (question_result_countdown <= 0) {
+      clearInterval(question_result_countdown_interval);
+      state = "overall result";
+      overall_result(io);
+    }
+  }, 1000);
+}
+
+function overall_result(io) {
+  let overall_result_countdown = RESULT_TIME_LIMIT;
+  io.to("registered").emit("overall result", {
+    overall_result_countdown: overall_result_countdown,
+    player_list: player_list,
+  });
+  overall_result_countdown_interval = setInterval(() => {
+    overall_result_countdown--;
+    io.to("registered").emit("overall result", {
+      overall_result_countdown: overall_result_countdown,
+      player_list: player_list,
+    });
+    if (overall_result_countdown <= 0) {
+      clearInterval(overall_result_countdown_interval);
+      state = "waiting for next question";
+      question_loading(io);
     }
   }, 1000);
 }
@@ -226,11 +269,11 @@ class Expression {
     switch (this.operator) {
       case "+":
       case "-":
-        return 15;
+        return 5;
       case "*":
       case "/":
       case "%":
-        return 60;
+        return 5;
       default:
         return 0;
     }
