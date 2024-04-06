@@ -72,6 +72,85 @@ function updatePlayerCountAndListGlobally(io) {
   });
 }
 
+function getRandomInteger(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  let randomNum;
+
+  do {
+    randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+  } while (randomNum === 0);
+
+  return randomNum;
+}
+function truncate(number) {
+  if (number >= 0) {
+    return Math.floor(number);
+  } else {
+    return Math.ceil(number);
+  }
+}
+
+class Expression {
+  constructor(num1, num2, operator) {
+    this.num1 = num1;
+    this.num2 = num2;
+    this.operator = operator;
+  }
+
+  result() {
+    switch (this.operator) {
+      case "+":
+        return this.num1 + this.num2;
+      case "-":
+        return this.num1 - this.num2;
+      case "*":
+        return this.num1 * this.num2;
+      case "/":
+        return truncate(this.num1 / this.num2);
+      case "%":
+        return this.num1 % this.num2;
+      default:
+        return "Invalid operator";
+    }
+  }
+
+  time_limit() {
+    switch (this.operator) {
+      case "+":
+      case "-":
+        return 15;
+      case "*":
+      case "/":
+      case "%":
+        return 60;
+      default:
+        return 0;
+    }
+  }
+
+  random() {
+    const operators = ["+", "-", "*", "/", "%"];
+    const randomOperator =
+      operators[Math.floor(Math.random() * operators.length)];
+    let randomNum1 = 0;
+    let randomNum2 = 0;
+    if (["+", "-"].includes(randomOperator)) {
+      randomNum1 = getRandomInteger(-10000, 10000);
+      randomNum2 = getRandomInteger(-10000, 10000);
+    } else if (randomOperator == "*") {
+      randomNum1 = getRandomInteger(-1000, 1000);
+      randomNum2 = getRandomInteger(-1000, 1000);
+    } else {
+      randomNum1 = getRandomInteger(-1000000, 1000000);
+      randomNum2 = getRandomInteger(-1000, 1000);
+    }
+
+    this.num1 = randomNum1;
+    this.num2 = randomNum2;
+    this.operator = randomOperator;
+  }
+}
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
