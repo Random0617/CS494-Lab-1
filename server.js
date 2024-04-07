@@ -12,12 +12,6 @@ const QUESTION_LOADING_TIME_LIMIT = 5;
 const RESULT_TIME_LIMIT = 7;
 const WINNER_TIME_LIMIT = 15;
 
-let connectedUsers = 0;
-let registeredPlayers = 0;
-let player_list = [];
-let state = "registration";
-
-// Player performance data structure
 class Player {
   constructor(username) {
     this.username = username;
@@ -42,6 +36,13 @@ class Player {
 class All_Players_Data {
   constructor() {
     this.players = [];
+  }
+  index_of(player_name) {
+    let searching_index = 0;
+    while (this.players[searching_index].username != player_name) {
+      searching_index++;
+    }
+    return searching_index;
   }
   total_number_of_players() {
     return this.players.length;
@@ -138,7 +139,25 @@ class All_Players_Data {
     }
     return placeholder_question_leaderboard;
   }
+  reset_question_stats() {
+    for (let i = 0; i < this.players.length; i++) {
+      this.players[i].last_question_answer = 0;
+      this.players[i].last_question_score = 0;
+      this.players[i].last_question_time_taken = 0;
+    }
+  }
 }
+
+let connectedUsers = 0;
+let registeredPlayers = 0;
+let player_list = [];
+let all_players_data = new All_Players_Data();
+let question_answering_time_elapsed = 0;
+
+let state = "registration";
+
+// Player performance data structure
+
 function compare_overall_leaderboard(a, b) {
   // Descending order
   if (a.total_score != b.total_score) {
@@ -256,7 +275,10 @@ io.on("connection", (socket) => {
         "display player name bottom left",
         player_list[i]
       );
+      let new_player = new Player(player_list[i]);
+      all_players_data.players.push(new_player);
     }
+    //console.log(all_players_data.mini_leaderboard_text());
     io.to("unregistered").emit("not allowed to play");
     io.to("registered").emit("set leaderboard text", player_list);
     io.to("registered").emit("allowed to play", game_loading_current_countdown);
@@ -269,9 +291,23 @@ io.on("connection", (socket) => {
       if (game_loading_current_countdown <= 0) {
         clearInterval(game_loading_countdown_interval);
         state = "waiting for next question";
-        question_loading(io);
+        question_loading(io, socket);
       }
     }, 1000);
+  });
+
+  socket.on("submit answer", (player_name, answer) => {
+    if (state == "question") {
+      let player_index = all_players_data.index_of(player_name);
+      let time_elapsed = question_answering_time_elapsed.toFixed(1);
+      console.log("Submitted name: ", player_name);
+      console.log("Submitted index: ", player_index);
+      console.log("Time taken: ", time_elapsed);
+      all_players_data.players[player_index].last_question_answer = answer;
+      all_players_data.players[player_index].last_question_time_taken =
+        time_elapsed;
+      io.to(player_name).emit("make answer read only");
+    }
   });
 });
 
@@ -302,13 +338,14 @@ function updatePlayerCountAndListGlobally(io) {
   });
 }
 
-function question_loading(io) {
+function question_loading(io, socket) {
   // Main game: question loop
   let question_loading_current_countdown = QUESTION_LOADING_TIME_LIMIT;
   io.to("registered").emit(
     "question loading",
     question_loading_current_countdown
   );
+  all_players_data.reset_question_stats();
   question_loading_countdown_interval = setInterval(() => {
     question_loading_current_countdown--;
     io.to("registered").emit(
@@ -318,19 +355,25 @@ function question_loading(io) {
     if (question_loading_current_countdown <= 0) {
       clearInterval(question_loading_countdown_interval);
       state = "question";
-      question_answering(io);
+      question_answering(io, socket);
     }
   }, 1000);
 }
 
-function question_answering(io) {
+function question_answering(io, socket) {
   let expr = new Expression(0, 0, "+");
   expr.random();
+  question_answering_time_elapsed = 0;
   let question_answering_countdown = expr.time_limit();
+  io.to("registered").emit("make answer editable");
   io.to("registered").emit("question answering", {
     question_answering_countdown: question_answering_countdown,
     expression: expr.string(),
   });
+  question_answering_time_countup = setInterval(() => {
+    question_answering_time_elapsed += 0.1;
+    //console.log(question_answering_time_elapsed);
+  }, 100);
   question_answering_countdown_interval = setInterval(() => {
     question_answering_countdown--;
     io.to("registered").emit("question answering", {
@@ -339,24 +382,51 @@ function question_answering(io) {
     });
     if (question_answering_countdown <= 0) {
       clearInterval(question_answering_countdown_interval);
+      clearInterval(question_answering_time_countup);
       state = "question result";
-      question_result(io);
+      question_result(io, expr.result());
     }
   }, 1000);
 }
 
-function question_result(io) {
+function question_result(io, result) {
   console.log("Reached question result phase");
+  question_answering_time_elapsed = 0;
+  let wrong_answerers = 0;
+  for (let i = 0; i < all_players_data.players.length; i++) {
+    if (all_players_data.players[i].last_question_answer == result) {
+      all_players_data.players[i].last_question_score = 1;
+    } else {
+      wrong_answerers++;
+      all_players_data.players[i].last_question_score = -1;
+    }
+  }
+  all_players_data.sort_by_question();
+  if (all_players_data.players[0].last_question_answer == result) {
+    all_players_data.players[0].last_question_score = 1 + wrong_answerers;
+  }
+  for (let i = 0; i < all_players_data.players.length; i++) {
+    all_players_data.players[i].total_score = Math.max(
+      all_players_data.players[i].total_score +
+        all_players_data.players[i].last_question_score,
+      0
+    );
+    if (all_players_data.players[i].last_question_score > 0) {
+      all_players_data.players[i].consecutive_wrongs = 0;
+    } else {
+      all_players_data.players[i].consecutive_wrongs++;
+    }
+  }
   let question_result_countdown = RESULT_TIME_LIMIT;
   io.to("registered").emit("question result", {
     question_result_countdown: question_result_countdown,
-    player_list: player_list,
+    question_leaderboard: all_players_data.question_leaderboard_text(),
   });
   question_result_countdown_interval = setInterval(() => {
     question_result_countdown--;
     io.to("registered").emit("question result", {
       question_result_countdown: question_result_countdown,
-      player_list: player_list,
+      question_leaderboard: all_players_data.question_leaderboard_text(),
     });
     if (question_result_countdown <= 0) {
       clearInterval(question_result_countdown_interval);
@@ -368,15 +438,18 @@ function question_result(io) {
 
 function overall_result(io) {
   let overall_result_countdown = RESULT_TIME_LIMIT;
+  all_players_data.sort_by_overall();
   io.to("registered").emit("overall result", {
     overall_result_countdown: overall_result_countdown,
-    player_list: player_list,
+    overall_leaderboard: all_players_data.overall_leaderboard_text(),
+    mini_leaderboard: all_players_data.mini_leaderboard_text(),
   });
   overall_result_countdown_interval = setInterval(() => {
     overall_result_countdown--;
     io.to("registered").emit("overall result", {
       overall_result_countdown: overall_result_countdown,
-      player_list: player_list,
+      overall_leaderboard: all_players_data.overall_leaderboard_text(),
+      mini_leaderboard: all_players_data.mini_leaderboard_text(),
     });
     if (overall_result_countdown <= 0) {
       clearInterval(overall_result_countdown_interval);
@@ -448,11 +521,11 @@ class Expression {
     switch (this.operator) {
       case "+":
       case "-":
-        return 5;
+        return 15;
       case "*":
       case "/":
       case "%":
-        return 5;
+        return 60;
       default:
         return 0;
     }

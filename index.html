@@ -203,6 +203,7 @@
       let post_question_leaderboard_text = document.getElementById(
         "post_question_leaderboard_text"
       );
+      let client_player_name = "";
 
       socket.on("userCount", function (user_count) {
         document.getElementById("userCount").textContent =
@@ -282,6 +283,7 @@
       socket.on("display player name bottom left", function (name) {
         player_name_text.textContent = name;
         player_name_text.style.display = "block";
+        client_player_name = name;
       });
       socket.on("question loading", function (current_countdown) {
         question_timer_text.style.display = "none";
@@ -290,6 +292,7 @@
         readyToPlayText.textContent =
           "Next question starts in " + current_countdown + "s...";
         readyToPlayText.style.display = "block";
+        answer_text.value = "";
       });
       socket.on("question answering", function (server) {
         if (readyToPlayText.style.display == "block") {
@@ -318,6 +321,9 @@
         if (lock_in_reminder_text.style.display == "block") {
           lock_in_reminder_text.style.display = "none";
         }
+        console.log("Display question leaderboard text");
+        post_question_leaderboard_text.textContent =
+          server.question_leaderboard;
         if (post_question_result_group.style.display == "none") {
           post_question_result_group.style.display = "block";
         }
@@ -327,20 +333,8 @@
         question_timer_text.textContent = server.overall_result_countdown;
         post_question_result_text.textContent = "Overall leaderboard";
         mini_leaderboard.style.display = "none";
-        // Placeholder
-        let placeholder_text = "Rank - Username - Consecutive wrongs - Score";
-        placeholder_text += "\n#1 - Player1 - 1 - 12";
-        placeholder_text += "\n#2 - Player2 - 2 - 11";
-        placeholder_text += "\n#3 - Player3 - 0 - 10";
-        placeholder_text += "\n#4 - Player4 - 2 - 9";
-        placeholder_text += "\n#5 - Player5 - 1 - 8";
-        placeholder_text += "\n#6 - Player6 - 0 - 6";
-        placeholder_text += "\n#7 - Player7 - 1 - 5";
-        placeholder_text += "\n#8 - Player8 - 2 - 4";
-        placeholder_text += "\n#9 - Player9 - 3 - N/A";
-        placeholder_text += "\n#10 - Player10 - 3 - N/A";
-        post_question_leaderboard_text.textContent = placeholder_text;
-        // End of placeholder
+        post_question_leaderboard_text.textContent = server.overall_leaderboard;
+        mini_leaderboard.textContent = server.mini_leaderboard;
       });
       socket.on("not allowed to play", function () {
         readyToPlayText.textContent =
@@ -350,9 +344,30 @@
       submitBtn.onclick = function () {
         socket.emit("check username", input.value);
       };
+      socket.on("make answer editable", function () {
+        answer_text.readOnly = false;
+      });
+      socket.on("make answer read only", function () {
+        answer_text.readOnly = true;
+      });
       startGameBtn.onclick = function () {
         socket.emit("start game");
       };
+
+      /*
+      input.addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && input.value.trim() !== "") {
+          socket.emit("chat message", input.value);
+          input.value = "";
+        }
+      });
+      */
+      answer_text.addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && answer_text.value.trim() !== "") {
+          console.log("Submitting answer");
+          socket.emit("submit answer", client_player_name, answer_text.value);
+        }
+      });
     </script>
   </body>
 </html>
