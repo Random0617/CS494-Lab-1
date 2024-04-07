@@ -17,6 +17,185 @@ let registeredPlayers = 0;
 let player_list = [];
 let state = "registration";
 
+// Player performance data structure
+class Player {
+  constructor(username) {
+    this.username = username;
+    // Overall data
+    this.displaying_index_overall = 1;
+    this.consecutive_wrongs = 0;
+    this.eliminated = false;
+    this.total_score = 0;
+    // Last question data
+    this.displaying_index_question = 1;
+    this.last_question_answer = 0;
+    this.last_question_time_taken = 0;
+    this.last_question_score = 0;
+  }
+  check_eliminate() {
+    if (this.consecutive_wrongs >= 3) {
+      this.total_score = 0;
+      this.eliminated = true;
+    }
+  }
+}
+class All_Players_Data {
+  constructor() {
+    this.players = [];
+  }
+  total_number_of_players() {
+    return this.players.length;
+  }
+  number_of_ongoing_players() {
+    let count = 0;
+    for (let i = 0; i < this.players.length; i++) {
+      if (!this.players[i].eliminated) {
+        count++;
+      }
+    }
+    return count;
+  }
+  sort_by_overall() {
+    this.players.sort(compare_overall_leaderboard);
+    this.players[0].displaying_index_overall = 1;
+    for (let i = 1; i < this.players.length; i++) {
+      if (this.players[i].total_score == this.players[i - 1].total_score) {
+        this.players[i].displaying_index_overall =
+          this.players[i - 1].displaying_index_overall;
+      } else {
+        this.players[i].displaying_index_overall = i + 1;
+      }
+    }
+  }
+  overall_leaderboard_text() {
+    let placeholder_text = "Rank - Username - Consecutive wrongs - Score";
+    for (let i = 0; i < this.players.length; i++) {
+      placeholder_text =
+        placeholder_text +
+        "\n#" +
+        this.players[i].displaying_index_overall +
+        " - " +
+        this.players[i].username +
+        " - " +
+        this.players[i].consecutive_wrongs +
+        " - " +
+        this.players[i].total_score;
+    }
+    return placeholder_text;
+  }
+  mini_leaderboard_text() {
+    let placeholder_text = "";
+    for (let i = 0; i < this.players.length; i++) {
+      placeholder_text =
+        placeholder_text +
+        "#" +
+        this.players[i].displaying_index_overall +
+        " - " +
+        this.players[i].username +
+        " - " +
+        this.players[i].total_score;
+      if (this.players[i].consecutive_wrongs > 0) {
+        placeholder_text += " - ";
+        for (let k = 0; k < this.players[i].consecutive_wrongs; k++) {
+          placeholder_text += "X";
+        }
+      }
+      placeholder_text += "\n";
+    }
+    return placeholder_text;
+  }
+  sort_by_question() {
+    this.players.sort(compare_question_leaderboard);
+    this.players[0].displaying_index_question = 1;
+    for (let i = 1; i < this.players.length; i++) {
+      if (
+        this.players[i].last_question_time_taken ==
+          this.players[i - 1].last_question_time_taken &&
+        this.players[i].last_question_score ==
+          this.players[i - 1].last_question_score
+      ) {
+        this.players[i].displaying_index_question =
+          this.players[i - 1].displaying_index_question;
+      } else {
+        this.players[i].displaying_index_question = i + 1;
+      }
+    }
+  }
+  question_leaderboard_text() {
+    let placeholder_question_leaderboard =
+      "Rank - Username - Time taken - Points earned";
+    for (let i = 0; i < this.number_of_ongoing_players(); i++) {
+      placeholder_question_leaderboard =
+        placeholder_question_leaderboard +
+        "\n#" +
+        this.players[i].displaying_index_question +
+        " - " +
+        this.players[i].username +
+        " - " +
+        this.players[i].last_question_time_taken +
+        "s - " +
+        this.players[i].last_question_score;
+    }
+    return placeholder_question_leaderboard;
+  }
+}
+function compare_overall_leaderboard(a, b) {
+  // Descending order
+  if (a.total_score != b.total_score) {
+    return b.total_score - a.total_score;
+  }
+  // Ascending order
+  return a.consecutive_wrongs - b.consecutive_wrongs;
+}
+function compare_question_leaderboard(a, b) {
+  if (a.eliminated != b.eliminated) {
+    return a.eliminated - b.eliminated;
+  }
+  if (a.last_question_score != b.last_question_score) {
+    return b.last_question_score - a.last_question_score;
+  }
+  return a.last_question_time_taken - b.last_question_time_taken;
+}
+/* // Copy this to a different file and uncomment this block to test it
+let player1 = new Player("player1");
+player1.total_score = 12;
+player1.consecutive_wrongs = 2;
+player1.check_eliminate();
+player1.last_question_time_taken = 2.1;
+player1.last_question_score = -1;
+let player2 = new Player("player2");
+player2.total_score = 10;
+player2.consecutive_wrongs = 1;
+player2.check_eliminate();
+player2.last_question_time_taken = 3;
+player2.last_question_score = 3;
+let player3 = new Player("player3");
+player3.total_score = 10;
+player3.consecutive_wrongs = 3;
+player3.check_eliminate();
+let player4 = new Player("player4");
+player4.total_score = 10;
+player4.consecutive_wrongs = 0;
+player4.last_question_time_taken = 4.5;
+player4.last_question_score = 1;
+player4.check_eliminate();
+
+let all_players_data = new All_Players_Data();
+all_players_data.players.push(player1);
+all_players_data.players.push(player2);
+all_players_data.players.push(player3);
+all_players_data.players.push(player4);
+console.log(all_players_data.total_number_of_players());
+console.log(all_players_data.number_of_ongoing_players());
+
+all_players_data.sort_by_overall();
+console.log(all_players_data.overall_leaderboard_text());
+console.log(all_players_data.mini_leaderboard_text());
+
+all_players_data.sort_by_question();
+console.log(all_players_data.question_leaderboard_text());
+*/
+
 io.on("connection", (socket) => {
   socket.has_registered = false;
   socket.username = "";
