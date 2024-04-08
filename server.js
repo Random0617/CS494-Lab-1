@@ -30,6 +30,7 @@ class Player {
     if (this.consecutive_wrongs >= 3) {
       this.total_score = 0;
       this.eliminated = true;
+      this.last_question_score = 0;
     }
   }
 }
@@ -299,14 +300,16 @@ io.on("connection", (socket) => {
   socket.on("submit answer", (player_name, answer) => {
     if (state == "question") {
       let player_index = all_players_data.index_of(player_name);
-      let time_elapsed = question_answering_time_elapsed.toFixed(1);
-      console.log("Submitted name: ", player_name);
-      console.log("Submitted index: ", player_index);
-      console.log("Time taken: ", time_elapsed);
-      all_players_data.players[player_index].last_question_answer = answer;
-      all_players_data.players[player_index].last_question_time_taken =
-        time_elapsed;
-      io.to(player_name).emit("make answer read only");
+      if (!all_players_data.players[player_index].eliminated) {
+        let time_elapsed = question_answering_time_elapsed.toFixed(1);
+        console.log("Submitted name: ", player_name);
+        console.log("Submitted index: ", player_index);
+        console.log("Time taken: ", time_elapsed);
+        all_players_data.players[player_index].last_question_answer = answer;
+        all_players_data.players[player_index].last_question_time_taken =
+          time_elapsed;
+        io.to(player_name).emit("make answer read only");
+      }
     }
   });
 });
@@ -365,7 +368,19 @@ function question_answering(io, socket) {
   expr.random();
   question_answering_time_elapsed = 0;
   let question_answering_countdown = expr.time_limit();
-  io.to("registered").emit("make answer editable");
+  console.log(expr.result()); // Testing
+  //io.to("registered").emit("make answer editable");
+  for (let i = 0; i < all_players_data.players.length; i++) {
+    if (all_players_data.players[i].eliminated) {
+      io.to(all_players_data.players[i].username).emit(
+        "disable answer due to being eliminated"
+      );
+    } else {
+      io.to(all_players_data.players[i].username).emit(
+        "enable answer for players still standing"
+      );
+    }
+  }
   io.to("registered").emit("question answering", {
     question_answering_countdown: question_answering_countdown,
     expression: expr.string(),
@@ -394,11 +409,13 @@ function question_result(io, result) {
   question_answering_time_elapsed = 0;
   let wrong_answerers = 0;
   for (let i = 0; i < all_players_data.players.length; i++) {
-    if (all_players_data.players[i].last_question_answer == result) {
-      all_players_data.players[i].last_question_score = 1;
-    } else {
-      wrong_answerers++;
-      all_players_data.players[i].last_question_score = -1;
+    if (!all_players_data.players[i].eliminated) {
+      if (all_players_data.players[i].last_question_answer == result) {
+        all_players_data.players[i].last_question_score = 1;
+      } else {
+        wrong_answerers++;
+        all_players_data.players[i].last_question_score = -1;
+      }
     }
   }
   all_players_data.sort_by_question();
@@ -406,15 +423,17 @@ function question_result(io, result) {
     all_players_data.players[0].last_question_score = 1 + wrong_answerers;
   }
   for (let i = 0; i < all_players_data.players.length; i++) {
-    all_players_data.players[i].total_score = Math.max(
-      all_players_data.players[i].total_score +
-        all_players_data.players[i].last_question_score,
-      0
-    );
-    if (all_players_data.players[i].last_question_score > 0) {
-      all_players_data.players[i].consecutive_wrongs = 0;
-    } else {
-      all_players_data.players[i].consecutive_wrongs++;
+    if (!all_players_data.players[i].eliminated) {
+      all_players_data.players[i].total_score = Math.max(
+        all_players_data.players[i].total_score +
+          all_players_data.players[i].last_question_score,
+        0
+      );
+      if (all_players_data.players[i].last_question_score > 0) {
+        all_players_data.players[i].consecutive_wrongs = 0;
+      } else {
+        all_players_data.players[i].consecutive_wrongs++;
+      }
     }
   }
   let question_result_countdown = RESULT_TIME_LIMIT;
@@ -439,6 +458,9 @@ function question_result(io, result) {
 function overall_result(io) {
   let overall_result_countdown = RESULT_TIME_LIMIT;
   all_players_data.sort_by_overall();
+  for (let i = 0; i < all_players_data.players.length; i++) {
+    all_players_data.players[i].check_eliminate();
+  }
   io.to("registered").emit("overall result", {
     overall_result_countdown: overall_result_countdown,
     overall_leaderboard: all_players_data.overall_leaderboard_text(),
@@ -525,7 +547,7 @@ class Expression {
       case "*":
       case "/":
       case "%":
-        return 60;
+        return 15;
       default:
         return 0;
     }

@@ -303,12 +303,16 @@
         question_timer_text.textContent = server.question_answering_countdown;
         document.getElementById("expression").textContent = server.expression;
         document.getElementById("expression question").style.display = "block";
-        if (answer_text.style.display == "none") {
-          answer_text.style.display = "block";
-        }
+      });
+      socket.on("disable answer due to being eliminated", function () {
         if (lock_in_reminder_text.style.display == "none") {
           lock_in_reminder_text.style.display = "block";
         }
+        if (answer_text.style.display == "block") {
+          answer_text.style.display = "none";
+        }
+        lock_in_reminder_text.textContent =
+          "You have been eliminated. Spectating...";
       });
       socket.on("question result", function (server) {
         post_question_result_text.textContent = "Question leaderboard";
@@ -344,8 +348,14 @@
       submitBtn.onclick = function () {
         socket.emit("check username", input.value);
       };
-      socket.on("make answer editable", function () {
+      socket.on("enable answer for players still standing", function () {
         answer_text.readOnly = false;
+        if (answer_text.style.display == "none") {
+          answer_text.style.display = "block";
+        }
+        if (lock_in_reminder_text.style.display == "none") {
+          lock_in_reminder_text.style.display = "block";
+        }
       });
       socket.on("make answer read only", function () {
         answer_text.readOnly = true;
