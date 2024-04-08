@@ -156,23 +156,6 @@
         placeholder="Player list"
       ></textarea>
     </div>
-    <script>
-      // Placeholder
-      let placeholder_question_leaderboard =
-        "Rank - Username - Time taken - Score";
-      placeholder_question_leaderboard += "\n#1 - Player1 - 8.42s - +3";
-      placeholder_question_leaderboard += "\n#2 - Player2 - 9.15s - +1";
-      placeholder_question_leaderboard += "\n#3 - Player3 - 10.22s - +1";
-      placeholder_question_leaderboard += "\n#4 - Player4 - 3.41s - -1";
-      placeholder_question_leaderboard += "\n#5 - Player5 - N/A - -1";
-      placeholder_question_leaderboard += "\n#6 - Player1 - 8.42s - +3";
-      placeholder_question_leaderboard += "\n#7 - Player2 - 9.15s - +1";
-      placeholder_question_leaderboard += "\n#8 - Player3 - 10.22s - +1";
-      placeholder_question_leaderboard += "\n#9 - Player4 - 3.41s - -1";
-      placeholder_question_leaderboard += "\n#10 - Player5 - N/A - -1";
-      document.getElementById("post_question_leaderboard_text").textContent =
-        placeholder_question_leaderboard;
-    </script>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -269,6 +252,12 @@
         readyToPlayText.style.display = "block";
         //mini_leaderboard_group.style.display = "block";
       });
+      socket.on("not allowed to play", function () {
+        readyToPlayText.textContent =
+          "The game has already started, please wait for the current game to end and then reload.";
+        readyToPlayText.style.display = "block";
+        input.textContent = "";
+      });
       socket.on("set leaderboard text", function (player_list) {
         // Placeholder
         console.log("Has reached set leaderboard text");
@@ -340,10 +329,46 @@
         post_question_leaderboard_text.textContent = server.overall_leaderboard;
         mini_leaderboard.textContent = server.mini_leaderboard;
       });
-      socket.on("not allowed to play", function () {
+      socket.on("no one wins", function () {
+        post_question_result_text.textContent =
+          "Ask the server owner to start a new game";
+        question_timer_text.style.display = "none";
+        post_question_leaderboard_text.style.display = "none";
+        if (mini_leaderboard.style.display == "none") {
+          mini_leaderboard.style.display = "block";
+        }
+        readyToPlayText.textContent = "Everyone is eliminated, sorry!";
+        if (readyToPlayText.style.display == "none") {
+          readyToPlayText.style.display = "block";
+        }
+      });
+      socket.on("last player standing", function (winner_name) {
+        post_question_result_text.textContent =
+          "Ask the server owner to start a new game";
+        question_timer_text.style.display = "none";
+        post_question_leaderboard_text.style.display = "none";
+        if (mini_leaderboard.style.display == "none") {
+          mini_leaderboard.style.display = "block";
+        }
         readyToPlayText.textContent =
-          "The game has already started, please wait for the current game to end.";
-        readyToPlayText.style.display = "block";
+          winner_name + " wins for being the last player standing!";
+        if (readyToPlayText.style.display == "none") {
+          readyToPlayText.style.display = "block";
+        }
+      });
+      socket.on("finisher", function (winner_name) {
+        post_question_result_text.textContent =
+          "Ask the server owner to start a new game";
+        question_timer_text.style.display = "none";
+        post_question_leaderboard_text.style.display = "none";
+        if (mini_leaderboard.style.display == "none") {
+          mini_leaderboard.style.display = "block";
+        }
+        readyToPlayText.textContent =
+          winner_name + " wins for reaching the finish line first!";
+        if (readyToPlayText.style.display == "none") {
+          readyToPlayText.style.display = "block";
+        }
       });
       submitBtn.onclick = function () {
         socket.emit("check username", input.value);

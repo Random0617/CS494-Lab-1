@@ -9,8 +9,8 @@ const io = socketIo(server);
 const PLAYER_LIMIT = 10;
 const GAME_START_TIME_LIMIT = 5;
 const QUESTION_LOADING_TIME_LIMIT = 5;
-const RESULT_TIME_LIMIT = 7;
-const WINNER_TIME_LIMIT = 15;
+const RESULT_TIME_LIMIT = 3; // Should be 7
+const WINNING_SCORE = 25;
 
 class Player {
   constructor(username) {
@@ -47,6 +47,15 @@ class All_Players_Data {
   }
   total_number_of_players() {
     return this.players.length;
+  }
+  highest_score() {
+    let result = 0;
+    for (let i = 0; i < this.players.length; i++) {
+      if (this.players[i].total_score > result) {
+        result = this.players[i].total_score;
+      }
+    }
+    return result;
   }
   number_of_ongoing_players() {
     let count = 0;
@@ -475,10 +484,59 @@ function overall_result(io) {
     });
     if (overall_result_countdown <= 0) {
       clearInterval(overall_result_countdown_interval);
-      state = "waiting for next question";
-      question_loading(io);
+      if (all_players_data.number_of_ongoing_players() < 2) {
+        state = "winner announcement";
+        winner_announcement(io, all_players_data.number_of_ongoing_players());
+      } else if (all_players_data.highest_score() >= WINNING_SCORE) {
+        state = "winner announcement";
+        winner_announcement(io, all_players_data.number_of_ongoing_players());
+      } else {
+        state = "waiting for next question";
+        question_loading(io);
+      }
     }
   }, 1000);
+}
+
+function winner_announcement(io, players_left) {
+  if (players_left == 0) {
+    io.to("registered").emit("no one wins");
+  } else if (players_left == 1) {
+    let last_survivor = "";
+    let cnt = 0;
+    while (all_players_data.players[cnt].eliminated) {
+      cnt++;
+    }
+    last_survivor = all_players_data.players[cnt].username;
+    io.to("registered").emit("last player standing", last_survivor);
+  } else {
+    // If there are at least 2 players remaining, it means the game ends by a player reaching the finish line
+    all_players_data.sort_by_overall();
+    let number_of_winners = 0;
+    for (let i = 0; i < all_players_data.players.length; i++) {
+      if (
+        all_players_data.players[i].total_score ==
+        all_players_data.highest_score()
+      ) {
+        number_of_winners++;
+      }
+    }
+    let winners_string = "";
+    let winners_counted = 0;
+    for (let i = 0; i < all_players_data.players.length; i++) {
+      if (
+        all_players_data.players[i].total_score ==
+        all_players_data.highest_score()
+      ) {
+        winners_counted++;
+        winners_string += all_players_data.players[i].username;
+        if (winners_counted < number_of_winners) {
+          winners_string += ", ";
+        }
+      }
+    }
+    io.to("registered").emit("finisher", winners_string);
+  }
 }
 
 function getRandomInteger(min, max) {
@@ -547,7 +605,7 @@ class Expression {
       case "*":
       case "/":
       case "%":
-        return 15;
+        return 60;
       default:
         return 0;
     }
