@@ -9,7 +9,7 @@ const io = socketIo(server);
 const PLAYER_LIMIT = 10;
 const GAME_START_TIME_LIMIT = 5;
 const QUESTION_LOADING_TIME_LIMIT = 5;
-const RESULT_TIME_LIMIT = 3; // Should be 7
+const RESULT_TIME_LIMIT = 7;
 const WINNING_SCORE = 25;
 
 class Player {
@@ -449,12 +449,14 @@ function question_result(io, result) {
   io.to("registered").emit("question result", {
     question_result_countdown: question_result_countdown,
     question_leaderboard: all_players_data.question_leaderboard_text(),
+    correct_answer: result,
   });
   question_result_countdown_interval = setInterval(() => {
     question_result_countdown--;
     io.to("registered").emit("question result", {
       question_result_countdown: question_result_countdown,
       question_leaderboard: all_players_data.question_leaderboard_text(),
+      correct_answer: result,
     });
     if (question_result_countdown <= 0) {
       clearInterval(question_result_countdown_interval);

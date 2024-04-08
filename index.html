@@ -304,7 +304,8 @@
           "You have been eliminated. Spectating...";
       });
       socket.on("question result", function (server) {
-        post_question_result_text.textContent = "Question leaderboard";
+        post_question_result_text.textContent =
+          "Correct answer: " + server.correct_answer;
         if (expression.style.display == "block") {
           expression.style.display = "none";
         }
