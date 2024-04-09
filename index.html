@@ -390,14 +390,6 @@
         socket.emit("start game");
       };
 
-      /*
-      input.addEventListener("keypress", function (e) {
-        if (e.key === "Enter" && input.value.trim() !== "") {
-          socket.emit("chat message", input.value);
-          input.value = "";
-        }
-      });
-      */
       answer_text.addEventListener("keypress", function (e) {
         if (e.key === "Enter" && answer_text.value.trim() !== "") {
           console.log("Submitting answer");
