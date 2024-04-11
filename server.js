@@ -81,37 +81,41 @@ class All_Players_Data {
   overall_leaderboard_text() {
     let placeholder_text = "Rank - Username - Consecutive wrongs - Score";
     for (let i = 0; i < this.players.length; i++) {
-      placeholder_text =
-        placeholder_text +
-        "\n#" +
-        this.players[i].displaying_index_overall +
-        " - " +
-        this.players[i].username +
-        " - " +
-        this.players[i].consecutive_wrongs +
-        " - " +
-        this.players[i].total_score;
+      if (!this.players[i].eliminated) {
+        placeholder_text =
+          placeholder_text +
+          "\n#" +
+          this.players[i].displaying_index_overall +
+          " - " +
+          this.players[i].username +
+          " - " +
+          this.players[i].consecutive_wrongs +
+          " - " +
+          this.players[i].total_score;
+      }
     }
     return placeholder_text;
   }
   mini_leaderboard_text() {
     let placeholder_text = "";
     for (let i = 0; i < this.players.length; i++) {
-      placeholder_text =
-        placeholder_text +
-        "#" +
-        this.players[i].displaying_index_overall +
-        " - " +
-        this.players[i].username +
-        " - " +
-        this.players[i].total_score;
-      if (this.players[i].consecutive_wrongs > 0) {
-        placeholder_text += " - ";
-        for (let k = 0; k < this.players[i].consecutive_wrongs; k++) {
-          placeholder_text += "X";
+      if (!this.players[i].eliminated) {
+        placeholder_text =
+          placeholder_text +
+          "#" +
+          this.players[i].displaying_index_overall +
+          " - " +
+          this.players[i].username +
+          " - " +
+          this.players[i].total_score;
+        if (this.players[i].consecutive_wrongs > 0) {
+          placeholder_text += " - ";
+          for (let k = 0; k < this.players[i].consecutive_wrongs; k++) {
+            placeholder_text += "X";
+          }
         }
+        placeholder_text += "\n";
       }
-      placeholder_text += "\n";
     }
     return placeholder_text;
   }
