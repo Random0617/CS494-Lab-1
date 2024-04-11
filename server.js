@@ -607,7 +607,7 @@ class Expression {
       case "*":
       case "/":
       case "%":
-        return 60;
+        return 30;
       default:
         return 0;
     }
@@ -619,16 +619,8 @@ class Expression {
       operators[Math.floor(Math.random() * operators.length)];
     let randomNum1 = 0;
     let randomNum2 = 0;
-    if (["+", "-"].includes(randomOperator)) {
-      randomNum1 = getRandomInteger(-10000, 10000);
-      randomNum2 = getRandomInteger(-10000, 10000);
-    } else if (randomOperator == "*") {
-      randomNum1 = getRandomInteger(-1000, 1000);
-      randomNum2 = getRandomInteger(-1000, 1000);
-    } else {
-      randomNum1 = getRandomInteger(-1000000, 1000000);
-      randomNum2 = getRandomInteger(-1000, 1000);
-    }
+    randomNum1 = getRandomInteger(-10000, 10000);
+    randomNum2 = getRandomInteger(-10000, 10000);
 
     this.num1 = randomNum1;
     this.num2 = randomNum2;
