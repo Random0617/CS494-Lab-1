@@ -36,7 +36,7 @@ Wireless LAN adapter Wi-Fi:
 - Each player has to enter a username to register. Their username must be 1-10 characters and consists of only the following characters: `[A-Za-z0-9_]`. Player usernames must be unique. Clicks on the "Submit" button to register, if successful, you will see the message "Registration completed successfully". Maximum number of players allowed to register is 10.
 - If there are at least 2 players, any registered player may click the "Start Game" button to start the game.
 - After a few seconds, an expression question is displayed on screen and players must enter the correct answer and submit it as fast as possible. Press "Enter" button or an equivalent button on mobile devices to lock in your answer.
-- Players answer incorrectly or fail to answer lose 1 point and get 1 strike. Players answer correctly, but not in the fastest time, receive 1 point and have their strikes cleared. Players answer correctly in the fastest time have their strikes cleared and receive 1 point, plus 1 point per incorrect answer.
+- Players answer incorrectly or fail to answer lose 1 point and get 1 strike. Players answer correctly, but not in the fastest time, receive 1 point and have their strikes cleared. Players answer correctly in the fastest time have their strikes cleared and receive 1 point, plus 1 point per player who got that question wrong.
 - Players who answer three consecutive questions incorrectly are out of the game, but they can still spectate and see the questions.
 - The game ends when:
   + All players are eliminated (no one wins)
