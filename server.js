@@ -432,6 +432,11 @@ function question_result(io, result) {
       }
     }
   }
+  if (all_players_data.number_of_ongoing_players() == 0) {
+    state = "winner announcement";
+    winner_announcement(io, all_players_data.number_of_ongoing_players());
+    return;
+  }
   all_players_data.sort_by_question();
   if (all_players_data.players[0].last_question_answer == result) {
     all_players_data.players[0].last_question_score = 1 + wrong_answerers;
@@ -473,6 +478,11 @@ function question_result(io, result) {
 
 function overall_result(io) {
   let overall_result_countdown = RESULT_TIME_LIMIT;
+  if (all_players_data.number_of_ongoing_players() == 0) {
+    state = "winner announcement";
+    winner_announcement(io, all_players_data.number_of_ongoing_players());
+    return;
+  }
   all_players_data.sort_by_overall();
   for (let i = 0; i < all_players_data.players.length; i++) {
     all_players_data.players[i].check_eliminate();
