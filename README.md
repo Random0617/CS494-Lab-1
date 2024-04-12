@@ -30,7 +30,7 @@ Wireless LAN adapter Wi-Fi:
 ```
 
 - Although the design of the web app is in `index.html`, if you go there, the game will not work. Instead, you have to go to the website of the following form (using any web browser, works on both PC and smartphones in the same local network): `XXX.XXX.X.X:3000`, with `XXX.XXX.X.X` being your IP address.
-- The host must keep their device and server running during the duration of the game. Other players may access the game with their own PC or smartphone, but they are only allowed to join the game if no one has not started the game yet.
+- The host must keep their device and server running during the duration of the game. Other players in the same local network may access the game with their own PC or smartphone, using the exact same link as the host, but they are only allowed to join the game if no one has not started the game yet.
 
 # Game rules - project requirements
 - Each player has to enter a username to register. Their username must be 1-10 characters and consists of only the following characters: `[A-Za-z0-9_]`. Player usernames must be unique. Clicks on the "Submit" button to register, if successful, you will see the message "Registration completed successfully". Maximum number of players allowed to register is 10.
