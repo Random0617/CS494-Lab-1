@@ -189,45 +189,6 @@ function compare_question_leaderboard(a, b) {
   }
   return a.last_question_time_taken - b.last_question_time_taken;
 }
-/* // Copy this to a different file and uncomment this block to test it
-let player1 = new Player("player1");
-player1.total_score = 12;
-player1.consecutive_wrongs = 2;
-player1.check_eliminate();
-player1.last_question_time_taken = 2.1;
-player1.last_question_score = -1;
-let player2 = new Player("player2");
-player2.total_score = 10;
-player2.consecutive_wrongs = 1;
-player2.check_eliminate();
-player2.last_question_time_taken = 3;
-player2.last_question_score = 3;
-let player3 = new Player("player3");
-player3.total_score = 10;
-player3.consecutive_wrongs = 3;
-player3.check_eliminate();
-let player4 = new Player("player4");
-player4.total_score = 10;
-player4.consecutive_wrongs = 0;
-player4.last_question_time_taken = 4.5;
-player4.last_question_score = 1;
-player4.check_eliminate();
-
-let all_players_data = new All_Players_Data();
-all_players_data.players.push(player1);
-all_players_data.players.push(player2);
-all_players_data.players.push(player3);
-all_players_data.players.push(player4);
-console.log(all_players_data.total_number_of_players());
-console.log(all_players_data.number_of_ongoing_players());
-
-all_players_data.sort_by_overall();
-console.log(all_players_data.overall_leaderboard_text());
-console.log(all_players_data.mini_leaderboard_text());
-
-all_players_data.sort_by_question();
-console.log(all_players_data.question_leaderboard_text());
-*/
 
 io.on("connection", (socket) => {
   socket.has_registered = false;
@@ -275,15 +236,6 @@ io.on("connection", (socket) => {
   socket.on("start game", () => {
     state = "waiting before 1st question";
     let game_loading_current_countdown = GAME_START_TIME_LIMIT;
-    /*
-    countdownInterval = setInterval(() => {
-      countdownValue--;
-      io.emit('countdown', countdownValue); // Emit countdown value to all clients
-      if (countdownValue <= 0) {
-        clearInterval(countdownInterval);
-      }
-    }, 1000);
-    */
     io.emit("clear screen");
     for (let i = 0; i < player_list.length; i++) {
       io.to(player_list[i]).emit(
@@ -293,7 +245,6 @@ io.on("connection", (socket) => {
       let new_player = new Player(player_list[i]);
       all_players_data.players.push(new_player);
     }
-    //console.log(all_players_data.mini_leaderboard_text());
     io.to("unregistered").emit("not allowed to play");
     io.to("registered").emit("set leaderboard text", player_list);
     io.to("registered").emit("allowed to play", game_loading_current_countdown);
@@ -382,8 +333,7 @@ function question_answering(io, socket) {
   expr.random();
   question_answering_time_elapsed = 0;
   let question_answering_countdown = expr.time_limit();
-  console.log(expr.result()); // Testing
-  //io.to("registered").emit("make answer editable");
+  console.log(expr.result());
   for (let i = 0; i < all_players_data.players.length; i++) {
     if (all_players_data.players[i].eliminated) {
       io.to(all_players_data.players[i].username).emit(
@@ -401,7 +351,6 @@ function question_answering(io, socket) {
   });
   question_answering_time_countup = setInterval(() => {
     question_answering_time_elapsed += 0.1;
-    //console.log(question_answering_time_elapsed);
   }, 100);
   question_answering_countdown_interval = setInterval(() => {
     question_answering_countdown--;
