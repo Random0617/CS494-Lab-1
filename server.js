@@ -246,6 +246,7 @@ io.on("connection", (socket) => {
       const indexRemove = player_list.indexOf(socket.username);
       player_list.splice(indexRemove, 1);
       registeredPlayers = player_list.length;
+      all_players_data.players = all_players_data.players.filter(player => player.username !== socket.username);
     }
     updatePlayerCountAndListGlobally(io);
   });
