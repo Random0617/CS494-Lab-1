@@ -22,7 +22,7 @@ class Player {
     this.total_score = 0;
     // Last question data
     this.displaying_index_question = 1;
-    this.last_question_answer = 0;
+    this.last_question_answer = 10 ** 9;
     this.last_question_time_taken = 0;
     this.last_question_score = 0;
   }
@@ -155,7 +155,7 @@ class All_Players_Data {
   }
   reset_question_stats() {
     for (let i = 0; i < this.players.length; i++) {
-      this.players[i].last_question_answer = 0;
+      this.players[i].last_question_answer = 10 ** 9;
       this.players[i].last_question_score = 0;
       this.players[i].last_question_time_taken = 0;
     }
